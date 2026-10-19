@@ -101,6 +101,27 @@ the development key or local SQLite.
    Shell and run `python manage.py createsuperuser`. Your admin account can
    then sign in at `/accounts/login/`; Django admin is at `/django-admin/`.
 
+### One-time initial admin setup without Render Shell
+
+Use this only if your hosting plan does not provide a Shell. This temporary
+setup page is protected by a secret environment variable, accepts POST only
+with Django's CSRF token, and returns 404 when the token is unset or a
+superuser already exists.
+
+1. Deploy the application and confirm migrations have run.
+2. In Render's web service **Environment** settings, add
+   `ADMIN_BOOTSTRAP_TOKEN` with a long, randomly generated value. Do not commit
+   this token or share it in chat.
+3. Save the environment change and wait for Render to finish redeploying.
+4. Visit `https://YOUR-RENDER-HOST/accounts/initial-admin-setup/`. Enter a
+   unique username, email, strong password, and the setup token. Submit once.
+5. Sign in at `/accounts/login/`, and verify `/django-admin/` opens.
+6. Immediately remove `ADMIN_BOOTSTRAP_TOKEN` from Render's environment and
+   redeploy. The endpoint also disables itself after a superuser exists, but
+   removing the token disables it independently.
+7. For defense in depth, remove this temporary setup form, view, and URL from
+   the source, commit, push, and redeploy after confirming admin access.
+
 #### Persistent image uploads
 
 The uploaded images use filesystem storage. Cloud hosts may discard files

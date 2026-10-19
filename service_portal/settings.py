@@ -21,6 +21,7 @@ if not SECRET_KEY:
             "Set DJANGO_SECRET_KEY when DJANGO_DEBUG is disabled."
         )
     SECRET_KEY = "django-insecure-local-development-only"
+ADMIN_BOOTSTRAP_TOKEN = os.environ.get("ADMIN_BOOTSTRAP_TOKEN", "")
 
 ALLOWED_HOSTS = [
     host.strip()

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Initial administrator setup | CivicConnect{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card p-4 p-md-5">
+      <p class="text-primary text-uppercase small fw-bold mb-1">One-time setup</p>
+      <h1 class="h3 mb-2">Create the first administrator</h1>
+      <p class="text-secondary mb-4">This page is available only while the private setup token is enabled and no superuser exists.</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "partials/form_fields.html" with form=form %}
+        <button class="btn btn-primary w-100 mt-2" type="submit">Create administrator</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

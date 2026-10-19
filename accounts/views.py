@@ -1,13 +1,17 @@
 """Authentication views for citizens."""
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
+from django.db import connection, transaction
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
+from django.views.decorators.http import require_http_methods
 
-from .forms import CitizenRegistrationForm
+from .forms import CitizenRegistrationForm, InitialAdminSetupForm
 from .models import User
 
 
@@ -45,3 +49,33 @@ class RegisterView(View):
             messages.success(request, "Your citizen account has been created.")
             return redirect("requests:my_requests")
         return render(request, self.template_name, {"form": form})
+
+
+@require_http_methods(["GET", "POST"])
+def initial_admin_setup(request):
+    """Create the first superuser through a temporary, token-protected page."""
+    expected_token = settings.ADMIN_BOOTSTRAP_TOKEN
+    if not expected_token or User.objects.filter(is_superuser=True).exists():
+        raise Http404
+
+    form = InitialAdminSetupForm(
+        request.POST or None,
+        expected_token=expected_token,
+    )
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            if connection.vendor == "postgresql":
+                table_name = connection.ops.quote_name(User._meta.db_table)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        f"LOCK TABLE {table_name} IN EXCLUSIVE MODE"
+                    )
+            if User.objects.filter(is_superuser=True).exists():
+                raise Http404
+            user = form.save()
+        messages.success(
+            request,
+            "The initial administrator was created. You can now log in.",
+        )
+        return redirect("accounts:login")
+    return render(request, "accounts/initial_admin_setup.html", {"form": form})
