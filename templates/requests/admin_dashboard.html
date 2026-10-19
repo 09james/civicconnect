@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard | CivicConnect{% endblock %}
+{% block content %}
+<div class="mb-4"><p class="text-primary text-uppercase small fw-bold mb-1">Service operations</p><h1 class="h2 fw-bold">Request dashboard</h1><p class="text-secondary mb-0">Monitor incoming issues and keep citizens updated.</p></div>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3"><div class="card p-4 h-100"><div class="text-secondary small">Open requests</div><div class="display-6 fw-bold">{{ open_count }}</div><div class="small text-secondary">Pending or in progress</div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card p-4 h-100"><div class="text-secondary small">Resolved requests</div><div class="display-6 fw-bold text-success">{{ resolved_count }}</div><div class="small text-secondary">Marked as resolved</div></div></div>
+  {% for category_item in categories %}<div class="col-sm-6 col-xl-3"><div class="card p-4 h-100"><div class="text-secondary small">{{ category_item.name }}</div><div class="display-6 fw-bold">{{ category_item.request_count }}</div><div class="small text-secondary">Requests in category</div></div></div>{% endfor %}
+</div>
+<section class="card p-3 p-md-4">
+  <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">All service requests</h2><span class="text-secondary small">{{ service_requests|length }} shown</span></div>
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-4"><label class="visually-hidden" for="filter-search">Search</label><input id="filter-search" class="form-control" type="search" name="q" value="{{ search_query }}" placeholder="Search location, details, citizen"></div>
+    <div class="col-md-3"><label class="visually-hidden" for="filter-status">Status</label><select id="filter-status" class="form-select" name="status"><option value="">All statuses</option><option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Pending</option><option value="in_progress" {% if selected_status == "in_progress" %}selected{% endif %}>In Progress</option><option value="resolved" {% if selected_status == "resolved" %}selected{% endif %}>Resolved</option></select></div>
+    <div class="col-md-3"><label class="visually-hidden" for="filter-category">Category</label><select id="filter-category" class="form-select" name="category"><option value="">All categories</option>{% for category_item in category_choices %}<option value="{{ category_item.pk }}" {% if selected_category == category_item.pk|stringformat:"s" %}selected{% endif %}>{{ category_item.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-primary flex-grow-1" type="submit">Filter</button><a class="btn btn-outline-secondary" href="{% url 'requests:admin_dashboard' %}">Clear</a></div>
+  </form>
+  {% if service_requests %}
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Request</th><th>Citizen</th><th>Category / location</th><th>Status</th><th>Update</th></tr></thead>
+        <tbody>
+        {% for request_item in service_requests %}
+          <tr>
+            <td><div class="fw-semibold">#{{ request_item.pk }}</div><div class="small text-secondary">{{ request_item.created_at|date:"M j, Y" }}</div><div class="small">{{ request_item.description|truncatechars:100 }}</div>{% if request_item.image %}<a class="small" href="{{ request_item.image.url }}" target="_blank" rel="noopener">Image</a>{% endif %}</td>
+            <td>{{ request_item.citizen.username }}</td>
+            <td>{{ request_item.category }}<div class="small text-secondary">{{ request_item.location }}</div></td>
+            <td>{% include "requests/status_badge.html" with status=request_item.status %}{% if request_item.resolved_at %}<div class="small text-secondary mt-1">{{ request_item.resolved_at|date:"M j, Y" }}</div>{% endif %}</td>
+            <td><form method="post" action="{% url 'requests:update_status' request_item.pk %}" class="d-flex gap-2">{% csrf_token %}<label class="visually-hidden" for="status-{{ request_item.pk }}">Request status</label><select id="status-{{ request_item.pk }}" name="status" class="form-select form-select-sm"><option value="pending" {% if request_item.status == "pending" %}selected{% endif %}>Pending</option><option value="in_progress" {% if request_item.status == "in_progress" %}selected{% endif %}>In Progress</option><option value="resolved" {% if request_item.status == "resolved" %}selected{% endif %}>Resolved</option></select><button class="btn btn-sm btn-outline-primary" type="submit">Save</button></form></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-center text-secondary py-4 mb-0">No requests match those filters.</p>
+  {% endif %}
+</section>
+{% endblock %}

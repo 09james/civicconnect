@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}CivicConnect | Local services, connected{% endblock %}
+{% block content %}
+<section class="hero rounded-4 p-4 p-lg-5 mb-5">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <span class="badge bg-light text-primary mb-3">Your community, heard</span>
+      <h1 class="display-5 fw-bold">Help improve the place you call home.</h1>
+      <p class="lead opacity-75 mb-4">Report a local issue, follow its progress, and help your community get the services it needs.</p>
+      {% if user.is_authenticated and user.role == "citizen" %}
+        <a class="btn btn-light btn-lg text-primary fw-semibold" href="{% url 'requests:create_request' %}">Submit a service request</a>
+      {% elif not user.is_authenticated %}
+        <a class="btn btn-light btn-lg text-primary fw-semibold me-2" href="{% url 'accounts:register' %}">Get started</a>
+        <a class="btn btn-outline-light btn-lg" href="{% url 'accounts:login' %}">Log in</a>
+      {% else %}
+        <a class="btn btn-light btn-lg text-primary fw-semibold" href="{% url 'requests:admin_dashboard' %}">Open admin dashboard</a>
+      {% endif %}
+    </div>
+    <div class="col-lg-4 text-lg-end"><div class="display-1" aria-hidden="true">🏙️</div></div>
+  </div>
+</section>
+<section>
+  <div class="mb-4">
+    <h2 class="h3 fw-bold">What can you report?</h2>
+    <p class="text-secondary">The right team can act faster when you share a clear description and location.</p>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4"><div class="card h-100 p-4"><div class="fs-2 mb-2" aria-hidden="true">💡</div><h3 class="h5">Street lighting</h3><p class="text-secondary mb-0">Report broken or faulty streetlights in your area.</p></div></div>
+    <div class="col-md-4"><div class="card h-100 p-4"><div class="fs-2 mb-2" aria-hidden="true">💧</div><h3 class="h5">Water supply</h3><p class="text-secondary mb-0">Let us know about leaks, outages, or water quality issues.</p></div></div>
+    <div class="col-md-4"><div class="card h-100 p-4"><div class="fs-2 mb-2" aria-hidden="true">♻️</div><h3 class="h5">Garbage collection</h3><p class="text-secondary mb-0">Flag missed collections and illegal dumping.</p></div></div>
+  </div>
+</section>
+{% endblock %}

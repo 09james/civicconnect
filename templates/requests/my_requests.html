@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}My requests | CivicConnect{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div><p class="text-primary text-uppercase small fw-bold mb-1">Citizen portal</p><h1 class="h2 fw-bold mb-0">My service requests</h1></div>
+  <a class="btn btn-primary" href="{% url 'requests:create_request' %}">+ New request</a>
+</div>
+{% if service_requests %}
+  <div class="row g-3">
+  {% for request_item in service_requests %}
+    <div class="col-12">
+      <article class="card p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+          <div><span class="text-secondary small">Request #{{ request_item.pk }}</span><h2 class="h5 mt-1 mb-1">{{ request_item.category }}</h2><p class="text-secondary mb-2">{{ request_item.location }}</p></div>
+          {% include "requests/status_badge.html" with status=request_item.status %}
+        </div>
+        <p class="mb-2">{{ request_item.description }}</p>
+        {% if request_item.image %}<a href="{{ request_item.image.url }}" target="_blank" rel="noopener">View attached image</a>{% endif %}
+        <div class="small text-secondary mt-3">Submitted {{ request_item.created_at|date:"M j, Y, g:i a" }} · Updated {{ request_item.updated_at|date:"M j, Y, g:i a" }}{% if request_item.resolved_at %} · Resolved {{ request_item.resolved_at|date:"M j, Y, g:i a" }}{% endif %}</div>
+      </article>
+    </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="card p-5 text-center">
+    <div class="display-5 mb-2" aria-hidden="true">📬</div>
+    <h2 class="h4">No requests yet</h2>
+    <p class="text-secondary">When you report a local service issue, you can track it here.</p>
+    <a class="btn btn-primary align-self-center" href="{% url 'requests:create_request' %}">Submit your first request</a>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Create an account | CivicConnect{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card p-4 p-md-5">
+      <h1 class="h3 mb-2">Create your citizen account</h1>
+      <p class="text-secondary mb-4">Register to submit and track local service requests.</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "partials/form_fields.html" with form=form %}
+        <button class="btn btn-primary w-100 mt-2" type="submit">Create account</button>
+      </form>
+      <p class="small mt-4 mb-0 text-center">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
