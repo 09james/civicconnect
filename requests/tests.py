@@ -22,7 +22,7 @@ class ServiceRequestTests(TestCase):
             password="StrongPass!123",
             role=User.Role.ADMIN,
         )
-        self.category = Category.objects.create(name="Water supply")
+        self.category, _ = Category.objects.get_or_create(name="Water supply")
         self.service_request = ServiceRequest.objects.create(
             citizen=self.citizen,
             category=self.category,
